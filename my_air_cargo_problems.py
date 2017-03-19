@@ -123,22 +123,31 @@ class AirCargoProblem(Problem):
             '''Create all concrete Fly actions and return a list
 
             :return: list of Action objects
+
+            Schema:
+            -------
+            Action(Fly(p, from, to),
+	    PRECOND: At(p, from) ∧ Plane(p) ∧ Airport(from) ∧ Airport(to)
+	    EFFECT: ¬ At(p, from) ∧ At(p, to))
             '''
-            flys = []
-            for fr in self.airports:
-                for to in self.airports:
-                    if fr != to:
-                        for p in self.planes:
-                            precond_pos = [expr("At({}, {})".format(p, fr)),
-                                           ]
-                            precond_neg = []
-                            effect_add = [expr("At({}, {})".format(p, to))]
-                            effect_rem = [expr("At({}, {})".format(p, fr))]
-                            fly_action = Action(expr("Fly({}, {}, {})".format(p, fr, to)),
-                                         [precond_pos, precond_neg],
-                                         [effect_add, effect_rem])
-                            flys.append(fly_action)
-            return flys
+            def preconds(fr, to, p):
+                pos = [expr("At({}, {})".format(p, fr))]
+                neg = []
+                return [pos, neg]
+
+            def effects(fr, to, p):
+                pos = [expr("At({}, {})".format(p, to))]
+                neg = [expr("At({}, {})".format(p, fr))]
+                return [pos, neg]
+
+            def action(fr, to, p):
+                return Action(expr("Fly({}, {}, {})".format(p, fr, to)),
+                              preconds(fr, to, p), effects(fr, to, p))
+
+            return [action(fr, to, p) for fr in self.airports
+                                      for to in self.airports
+                                      for p in self.planes
+                                      if fr != to]
 
         return load_actions() + unload_actions() + fly_actions()
 
