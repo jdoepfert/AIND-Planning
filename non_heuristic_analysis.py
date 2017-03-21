@@ -39,7 +39,7 @@ def run_search(problem, search_function, parameter=None):
     return ip, node, elapsed_time
 
 
-def evaluate(ip, node, elapsed_time):
+def evaluation(ip, node, elapsed_time):
     return  {'Expansions':ip.succs,
              'Goal Tests':ip.goal_tests,
              'New Nodes': ip.states,
@@ -50,6 +50,16 @@ def evaluate(ip, node, elapsed_time):
             }
 
 
+def failed_evaluation():
+     return {'Expansions': '-',
+             'Goal Tests': '-',
+             'New Nodes': '-',
+             'Plan Lenght': '-',
+             'Time': '-',
+             'Actions': '-'
+            }
+
+ 
 def entry_already_stored(prob_idx, search_idx, filename, key='test'):
     pname, p = PROBLEMS[prob_idx]
     sname, s, h = SEARCHES[search_idx]
@@ -61,57 +71,43 @@ def entry_already_stored(prob_idx, search_idx, filename, key='test'):
 def create_report_df(prob_idx, search_idx):
     problem_name, p = PROBLEMS[prob_idx]
     search_name, s, h = SEARCHES[search_idx]
-
     hstring = h if not h else " with {}".format(h)
-    print("\nSolving {} using {}{}...".format(problem_name, search_name, hstring))
-
-    _p = p()
-    _h = None if not h else getattr(_p, h)
-    results = run_search(_p, s, _h)
     
-    report = evaluate(*results)
+    if not (prob_idx, search_idx) in EXCLUDE_IDX:
+        print("\nSolving {} using {}{}...".format(problem_name, search_name, hstring))
+
+        _p = p()
+        _h = None if not h else getattr(_p, h)
+        results = run_search(_p, s, _h)
+
+        report = evaluation(*results)
+    else:
+        print("\nSkipping {} using {}{}...".format(problem_name, search_name, hstring))
+        report = failed_evaluation()
+
     report['Problem'] = problem_name
     report['Search Method'] = search_name
-
     return pd.DataFrame([report])
 
 
-def store_append_df(df, filename='non_heuristic_report.h5', key='test'):
+def store_append_df(df, filename='non_heuristic_report.h5', key='test'):    
     if isinstance(df, pd.DataFrame):
         if not os.path.isfile(filename):
             df.to_hdf(filename, key)
         else:
             df_old = pd.read_hdf(filename, key)
             df_new = df_old.append(df)
-            df.to_hdf(filename, key)
+            df_new.to_hdf(filename, key)
 
 
 def run_analysis(filename):
     for prob_idx in range(len(PROBLEMS)):
         for search_idx in range(len(SEARCHES)):
-            if not entry_already_stored(prob_idx, search_idx, filename):
-                if not (prob_idx, search_idx) in EXCLUDE_IDX:
-                    report = create_report_df(prob_idx, search_idx)
-                    store_append_df(report, filename)
+            if not entry_already_stored(prob_idx, search_idx, filename):                
+                report = create_report_df(prob_idx, search_idx)
+                store_append_df(report, filename)
                 
-                
-def visualize(filename):
-
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    
-    df = pd.read_hdf(filename)
-
-    g = sns.factorplot(data=df, hue='Search Method', y='Time', x='Problem',
-                       kind='bar', legend=False)
-    g.fig.get_axes()[0].set_yscale('log')
-    #g.set_xticklabels(rotation=45)
-    plt.tight_layout()
-    plt.legend(loc='upper left')
-    plt.show()    
-    
 
 if __name__ == '__main__':
     filename='data/non_heuristic_report.h5'
     run_analysis(filename)
-    visualize(filename)
