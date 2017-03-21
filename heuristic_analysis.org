@@ -2,7 +2,11 @@
 #+LaTeX_HEADER: \author{J\"org D\"opfert}
 #+LaTeX_CLASS_OPTIONS: [11pt]
 #+LaTeX_HEADER: \usepackage[a4paper, total={150mm,237mm}, left=30mm, top=20mm]{geometry}
- 
+ #+LaTeX_HEADER: \usepackage{caption} 
+
+#+BEGIN_LaTeX
+\captionsetup[table]{skip=8pt}
+#+END_LaTeX
  
 
 #+TITLE: Planning (Lesson 11): Heuristic Analysis
@@ -82,7 +86,7 @@ df = df.drop('Actions', 1)
 cols = ['Problem', 'Search Method', 'Plan Lenght', 'Time', 'New Nodes', 'Goal Tests']
 df['Search Method'] = df['Search Method'].str.replace('_', ' ')
 df['Problem'] = df['Problem'].str.replace('Air Cargo Problem', '')
-df['Time'] = np.round(df['Time'], 2)
+df['Time'] = df['Time'].astype(str).str[:5]
 df = df.sort_values(['Problem', 'Search Method'])
 df = df[cols].set_index('Problem')
 return(tabulate(df, headers="keys", tablefmt="orgtbl"))
@@ -92,23 +96,26 @@ return(tabulate(df, headers="keys", tablefmt="orgtbl"))
 #+CAPTION: Performance of the different custom heuristics.
 #+ATTR_LATEX: :align ll|cccc :placement [t]
 #+RESULTS:
-| Problem | Search Method                  | Plan Lenght |    Time | New Nodes | Goal Tests |
-|---------+--------------------------------+-------------+---------+-----------+------------|
-|       1 | breadth first search           |           6 |    0.04 |       180 |         56 |
-|       1 | breadth first tree search      |           6 |    1.13 |      5960 |       1459 |
-|       1 | depth first graph search       |          12 |    0.01 |        48 |         13 |
-|       1 | depth limited search           |          50 |    0.11 |       414 |        271 |
-|       1 | greedy best first graph search |           6 |    0.01 |        28 |          9 |
-|       1 | uniform cost search            |           6 |    0.04 |       224 |         57 |
-|       2 | breadth first search           |           9 |   15.96 |     30509 |       4609 |
-|       2 | depth first graph search       |         575 |    3.51 |      5211 |        583 |
-|       2 | depth limited search           |          50 | 1147.65 |   2054119 |    2053741 |
-|       2 | greedy best first graph search |          17 |     8.8 |      8910 |        992 |
-|       2 | uniform cost search            |           9 |   74.66 |     44030 |       4854 |
-|       3 | breadth first search           |          12 |  123.53 |    129631 |      18098 |
-|       3 | depth first graph search       |         596 |       4 |      5176 |        628 |
-|       3 | greedy best first graph search |          22 |  128.96 |     49429 |       5616 |
-|       3 | uniform cost search            |          12 |  489.38 |    159716 |      18237 |
+| Problem | Search Method                  | Plan Lenght |  Time | New Nodes | Goal Tests |
+|---------+--------------------------------+-------------+-------+-----------+------------|
+|       1 | breadth first search           |           6 | 0.038 |       180 |         56 |
+|       1 | breadth first tree search      |           6 | 1.075 |      5960 |       1459 |
+|       1 | depth first graph search       |          12 | 0.007 |        48 |         13 |
+|       1 | depth limited search           |          50 | 0.107 |       414 |        271 |
+|       1 | greedy best first graph search |           6 | 0.011 |        28 |          9 |
+|       1 | uniform cost search            |           6 | 0.045 |       224 |         57 |
+|       2 | breadth first search           |           9 | 15.95 |     30509 |       4609 |
+|       2 | breadth first tree search      |           - |     - |         - |          - |
+|       2 | depth first graph search       |         575 | 3.561 |      5211 |        583 |
+|       2 | depth limited search           |          50 | 1067. |   2054119 |    2053741 |
+|       2 | greedy best first graph search |          17 | 7.951 |      8910 |        992 |
+|       2 | uniform cost search            |           9 | 49.07 |     44030 |       4854 |
+|       3 | breadth first search           |          12 | 119.3 |    129631 |      18098 |
+|       3 | breadth first tree search      |           - |     - |         - |          - |
+|       3 | depth first graph search       |         596 | 3.616 |      5176 |        628 |
+|       3 | depth limited search           |           - |     - |         - |          - |
+|       3 | greedy best first graph search |          22 | 123.1 |     49429 |       5616 |
+|       3 | uniform cost search            |          12 | 444.7 |    159716 |      18237 |
 
 
 According to the table, all the custom heuristics outperform =ID Improved=,
