@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 from timeit import default_timer as timer
 
-from run_search import PROBLEMS, PrintableProblem
+from run_search import PrintableProblem
 from aimacode.search import (breadth_first_search, astar_search,
     breadth_first_tree_search, depth_first_graph_search, uniform_cost_search,
     greedy_best_first_graph_search, depth_limited_search)
@@ -30,7 +30,7 @@ EXCLUDE_IDX = [(1, 1),   # breadth first tree on prob 2
                (2, 3),   # depth limited search on prob 3
                (2, 7),   # h_ignore_preconditions on prob 3
                (1, 7),   # h_ignore_preconditions on prob 1
-               (1, 8),   # h_pg_levelsum on prob 2
+          #     (1, 8),   # h_pg_levelsum on prob 2
                (2, 8),   # h_pg_levelsum on prob 3
                ]
 

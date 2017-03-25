@@ -1,8 +1,8 @@
 #+OPTIONS: toc:nil author:nil creator:nil
 #+LaTeX_HEADER: \author{J\"org D\"opfert}
 #+LaTeX_CLASS_OPTIONS: [11pt]
-#+LaTeX_HEADER: \usepackage[a4paper, total={150mm,237mm}, left=30mm, top=20mm]{geometry}
- #+LaTeX_HEADER: \usepackage{caption} 
+#+LaTeX_HEADER: \usepackage[a4paper, total={150mm,242mm}, left=30mm, top=20mm]{geometry}
+#+LaTeX_HEADER: \usepackage{caption} 
 
 #+BEGIN_LaTeX
 \captionsetup[table]{skip=8pt}
@@ -13,7 +13,7 @@
 
 
 
-I begin this report with an evaluation of the results of the different search
+I begin this report with an evaluation of the results of selected search
 methods. Optimal plans can be found in Section [[Optimal plans]], and detailed
 metrics for all problems in consideration are displayed in Table [[tab:tab1]].
 
@@ -41,7 +41,7 @@ plt.legend(loc='upper left')
 [[file:data/time.pdf]]
 
 
-The fastest searches for all problems are =depth first graph search= and
+Among the fastest searches for all problems are =depth first graph search= and
 =greedy best first graph search=. However, those methodes do not find
 optimal plans in general, as can be seen in Figure [[fig:planlen]] (both
 methods have a larger plan lenghts than the optimal =breadth first
@@ -49,7 +49,7 @@ search= solution for problems 2 and 3).
 
 
  The =breadth first search=  always finds an optimal plan, but at the
-expense of speed: It is always slower than =depth first graph search=
+expense of speed: It is always slower than for example =depth first graph search=
 since it expands much more nodes (compare Figure [[fig:nodes]]). The
 slowest uninformed search seems to be =breadth first tree search=: It
 expands a lot of nodes, since it does not keep track of nodes that
@@ -77,7 +77,7 @@ plt.legend(loc='upper left')
 #+begin_src python :exports results :results file :noweb strip-export
 <<preamble>>
 <<preproc_plot>>
-g = sns.factorplot(data=df, hue='Search Method', y='New Nodes', x='Problem',
+g = sns.factorplot(data=df, hue='Search Method', y='Expansions', x='Problem',
                    kind='bar', legend=False)
 g.fig.get_axes()[0].set_yscale('log')
 plt.legend(loc='upper left')
@@ -99,34 +99,35 @@ node with the cheapest path cost, and the latter choses the node with
 the cheapest path cost plus a constant.
 
 The informed searches =astar search pg levelsum= and =astar search
-ignore precond= performed very similar on problem 1 (with the latter
-being a bit faster) and did not finish below 10 minutes on problems 2
-and 3. For the former, this probably due to the computational power
-required for building the planning graphs. For the latter =astar search ignore
-precond=, this might be due to my inefficient implementation: I use a
+ignore precond= perform similar on problem 1 in terms of computation
+time. However, the former expands much less nodes: This is expected,
+since the =levelsum= heuristic calculated using a planning graph
+should be much stronger than simply ignoring the action preconditions.
+
+
+The =astar search pg levelsum= search did not finish below 10 minutes
+on problem 3, and the =astar search ignore precond= search not even on
+problem 2. For the former, this probably due to the
+computational power required for building the planning graphs. For the
+latter, this might be due to my inefficient implementation: I use a
 breadth first search to find the solution lengths of the relaxed
-problem without action preconditions. This could probably be implemented much
-faster, especially if one assumes that the subgoal are independent.
+problem without action preconditions. This could probably be
+implemented much faster, especially if one assumes that the subgoal
+are independent.
 
-The informed searches always find optimal plans for problem 1. For the  =astar search
-ignore precond=, this is always the case, since it uses an admissible
-heuristic. The =astar search pg levelsum= is not neccessarily
-admissible, but has shown good performance according to the AIMA book.
 
-When comparing informed vs. uninformed searches with regard to node
-expansions, the informed searches are slightly better as expected
-(this could only be assessed for problem 1 due to missing data).
-However, when it comes to speed, the informed searches are much worse
-than the uninformed once. Again, this could be attributed to the large
-overhead for building the planning graphs and my
-inefficient implementation of the "ignore preconditions" heuristic.
+The informed searches find optimal plans for problem 1 and 2. For the
+=astar search ignore precond=, this is a general result, since it uses
+an admissible heuristic. The =astar search pg levelsum= is not
+neccessarily admissible, but has shown good performance according to
+the AIMA book.
 
-/Note:/ The two heuristics =astar search pg levelsum= and =astar search
-ignore precond= have exactly the same metrics on problem 1 (except of
-"elapsed time"). This is suspicious, and I would have expected the
-planning graph search to have less node expansions. Maybe there is a
-bug in my code.
-
+The informed searches expand less nodes than the optimal uniformed
+searches, as expected (this could only be fully assessed for problem 1 due
+to missing data). However, when it comes to speed, the informed
+searches are worse than the uninformed ones. Again, this could be
+attributed to the large overhead for building the planning graphs and
+my inefficient implementation of the "ignore preconditions" heuristic.
 
 
 * Optimal plans
@@ -211,6 +212,10 @@ Unload(C4, P2, SFO)
 Metrics for all problems in consideration are displayed in Table
 [[tab:tab1]].
 
+#+BEGIN_LaTeX
+\hspace*{-1cm}
+#+END_LaTeX
+
 #+begin_src python :exports results :results raw :noweb strip-export
 <<preamble>>
 def custom_round(x):
@@ -222,10 +227,11 @@ def custom_round(x):
 filename='data/non_heuristic_report.h5'
 df = pd.read_hdf(filename)
 df = df.drop('Actions', 1)
-cols = ['Problem', 'Search Method', 'Plan Lenght', 'Time [sec]', 'New Nodes', 'Goal Tests']
+cols = ['Problem', 'Search Method', 'Plan Lenght', 'Time [sec]', 'New Nodes', 'Goal Tests', 'Expansions']
 df['Search Method'] = df['Search Method'].str.replace('_', ' ')
 df['Search Method'] = df['Search Method'].str.replace('h ignore preconditions', 'ignore precond')
 df['Search Method'] = df['Search Method'].str.replace('greedy best first graph search', 'greedy bfgs')
+df = df[df['Search Method'] != 'depth limited search']
 df['Problem'] = df['Problem'].str.replace('Air Cargo Problem', '')
 df['Time'] = df['Time'].apply(custom_round)
 df = df.rename(columns={'Time': 'Time [sec]'})
@@ -236,37 +242,41 @@ return(tabulate(df, headers="keys", tablefmt="orgtbl"))
 
 #+LABEL:   tab:tab1
 #+CAPTION: Performance of the different custom heuristics.
-#+ATTR_LATEX: :align cl|cccc :placement [h]
+#+ATTR_LATEX: :align cl|ccccc :placement [h] :font \small \hspace*{-1cm}
 #+RESULTS:
-| Problem | Search Method               | Plan Lenght | Time [sec] | New Nodes | Goal Tests |
-|---------+-----------------------------+-------------+------------+-----------+------------|
-|       1 | astar search h 1            |           6 |       0.05 |       224 |         57 |
-|       1 | astar search h pg levelsum  |           6 |       4.24 |       170 |         43 |
-|       1 | astar search ignore precond |           6 |       2.21 |       170 |         43 |
-|       1 | breadth first search        |           6 |       0.04 |       180 |         56 |
-|       1 | breadth first tree search   |           6 |       1.08 |      5960 |       1459 |
-|       1 | depth first graph search    |          12 |       0.01 |        48 |         13 |
-|       1 | depth limited search        |          50 |       0.11 |       414 |        271 |
-|       1 | greedy bfgs h 1             |           6 |       0.01 |        28 |          9 |
-|       1 | uniform cost search         |           6 |       0.05 |       224 |         57 |
-|       2 | astar search h 1            |           9 |      66.63 |     44030 |       4854 |
-|       2 | astar search h pg levelsum  |           - |          - |         - |          - |
-|       2 | astar search ignore precond |           - |          - |         - |          - |
-|       2 | breadth first search        |           9 |      15.96 |     30509 |       4609 |
-|       2 | breadth first tree search   |           - |          - |         - |          - |
-|       2 | depth first graph search    |         575 |       3.56 |      5211 |        583 |
-|       2 | depth limited search        |          50 |    1067.59 |   2054119 |    2053741 |
-|       2 | greedy bfgs h 1             |          17 |       9.17 |      8910 |        992 |
-|       2 | uniform cost search         |           9 |      49.08 |     44030 |       4854 |
-|       3 | astar search h 1            |          12 |      597.8 |    159716 |      18237 |
-|       3 | astar search h pg levelsum  |           - |          - |         - |          - |
-|       3 | astar search ignore precond |           - |          - |         - |          - |
-|       3 | breadth first search        |          12 |     119.31 |    129631 |      18098 |
-|       3 | breadth first tree search   |           - |          - |         - |          - |
-|       3 | depth first graph search    |         596 |       3.62 |      5176 |        628 |
-|       3 | depth limited search        |           - |          - |         - |          - |
-|       3 | greedy bfgs h 1             |          22 |     154.53 |     49429 |       5616 |
-|       3 | uniform cost search         |          12 |     444.72 |    159716 |      18237 |
+| Problem | Search Method               | Plan Lenght | Time [sec] | New Nodes | Goal Tests | Expansions |
+|---------+-----------------------------+-------------+------------+-----------+------------+------------|
+|       1 | astar search h 1            |           6 |       0.05 |       224 |         57 |         55 |
+|       1 | astar search h pg levelsum  |           6 |       2.06 |        50 |         13 |         11 |
+|       1 | astar search ignore precond |           6 |       2.21 |       170 |         43 |         41 |
+|       1 | breadth first search        |           6 |       0.04 |       180 |         56 |         43 |
+|       1 | breadth first tree search   |           6 |       1.08 |      5960 |       1459 |       1458 |
+|       1 | depth first graph search    |          12 |       0.01 |        48 |         13 |         12 |
+|       1 | depth limited search        |          50 |       0.11 |       414 |        271 |        101 |
+|       1 | greedy bfgs h 1             |           6 |       0.01 |        28 |          9 |          7 |
+|       1 | uniform cost search         |           6 |       0.05 |       224 |         57 |         55 |
+|       2 | astar search h 1            |           9 |      66.63 |     44030 |       4854 |       4852 |
+|       2 | astar search h pg levelsum  |           - |          - |         - |          - |          - |
+|       2 | astar search ignore precond |           - |          - |         - |          - |          - |
+|       2 | breadth first search        |           9 |      15.96 |     30509 |       4609 |       3343 |
+|       2 | breadth first tree search   |           - |          - |         - |          - |          - |
+|       2 | depth first graph search    |         575 |       3.56 |      5211 |        583 |        582 |
+|       2 | depth limited search        |          50 |    1067.59 |   2054119 |    2053741 |     222719 |
+|       2 | greedy bfgs h 1             |          17 |       9.17 |      8910 |        992 |        990 |
+|       2 | uniform cost search         |           9 |      49.08 |     44030 |       4854 |       4852 |
+|       3 | astar search h 1            |          12 |      597.8 |    159716 |      18237 |      18235 |
+|       3 | astar search h pg levelsum  |           - |          - |         - |          - |          - |
+|       3 | astar search ignore precond |           - |          - |         - |          - |          - |
+|       3 | breadth first search        |          12 |     119.31 |    129631 |      18098 |      14663 |
+|       3 | breadth first tree search   |           - |          - |         - |          - |          - |
+|       3 | depth first graph search    |         596 |       3.62 |      5176 |        628 |        627 |
+|       3 | depth limited search        |           - |          - |         - |          - |          - |
+|       3 | greedy bfgs h 1             |          22 |     154.53 |     49429 |       5616 |       5614 |
+|       3 | uniform cost search         |          12 |     444.72 |    159716 |      18237 |      18235 |
+
+#+BEGIN_LaTeX
+\end{adjustwidth} 
+#+END_LaTeX
 
 
 * code blocks                                                      :noexport:
@@ -304,11 +314,13 @@ cols = ['Problem', 'Search Method', 'Plan Length', 'Time [sec]', 'New Nodes', 'G
 df['Search Method'] = df['Search Method'].str.replace('_', ' ')
 df['Search Method'] = df['Search Method'].str.replace('h ignore preconditions', 'ignore precond')
 df['Search Method'] = df['Search Method'].str.replace('greedy best first graph search', 'greedy bfgs')
+df = df[df['Search Method'] != 'depth limited search']
 # df['Problem'] = df['Problem'].str.replace('Air Cargo Problem', '')
 df['Time'] = df['Time'].apply(fill_nans)
 df['New Nodes'] = df['New Nodes'].apply(fill_nans)
 df['Goal Tests'] = df['Goal Tests'].apply(fill_nans)
 df['Plan Length'] = df['Plan Length'].apply(fill_nans)
+df['Expansions'] = df['Expansions'].apply(fill_nans)
 df = df.rename(columns={'Time': 'Time [sec]'})
 df = df.sort_values(['Problem', 'Search Method'])
 #+END_SRC
