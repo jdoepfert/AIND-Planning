@@ -1,4 +1,5 @@
 import os
+import logging
 
 import pandas as pd
 from timeit import default_timer as timer
@@ -6,8 +7,7 @@ from timeit import default_timer as timer
 from run_search import PROBLEMS, PrintableProblem
 from aimacode.search import (breadth_first_search, astar_search,
     breadth_first_tree_search, depth_first_graph_search, uniform_cost_search,
-    greedy_best_first_graph_search, depth_limited_search,
-    recursive_best_first_search)
+    greedy_best_first_graph_search, depth_limited_search)
 from my_air_cargo_problems import air_cargo_p1, air_cargo_p2, air_cargo_p3
 
 
@@ -20,11 +20,23 @@ SEARCHES = [["breadth_first_search", breadth_first_search, ""],
             ['depth_limited_search', depth_limited_search, ""],
             ['uniform_cost_search', uniform_cost_search, ""],
             ['greedy_best_first_graph_search', greedy_best_first_graph_search, 'h_1'],
+            ['astar_search', astar_search, 'h_1'],
+            ['astar_search', astar_search, 'h_ignore_preconditions'],
+            ['astar_search', astar_search, 'h_pg_levelsum'],
             ]
 # exclude some searches since they take too long (>10min)
 EXCLUDE_IDX = [(1, 1),   # breadth first tree on prob 2
-               (2, 3),   # depth limited searchon prob 3
-               (2, 1),]  # breadth first tree on prob 3
+               (2, 1),   # breadth first tree on prob 3
+               (2, 3),   # depth limited search on prob 3
+               (2, 7),   # h_ignore_preconditions on prob 3
+               (1, 7),   # h_ignore_preconditions on prob 1
+               (1, 8),   # h_pg_levelsum on prob 2
+               (2, 8),   # h_pg_levelsum on prob 3
+               ]
+
+
+fmt = '%(asctime)s %(module)s:%(funcName)s:%(lineno)s:%(levelname)s:%(message)s'
+logging.basicConfig(format=fmt, level=logging.INFO)
 
 
 def run_search(problem, search_function, parameter=None):
@@ -64,7 +76,8 @@ def entry_already_stored(prob_idx, search_idx, filename, key='test'):
     pname, p = PROBLEMS[prob_idx]
     sname, s, h = SEARCHES[search_idx]
     df = pd.read_hdf(filename, key)
-    where = (df['Problem'] == pname) & (df['Search Method'] == sname)
+    if h != '': h = '_' + h
+    where = (df['Problem'] == pname) & (df['Search Method'] == sname + h)
     return not df[where].empty
 
     
@@ -74,7 +87,8 @@ def create_report_df(prob_idx, search_idx):
     hstring = h if not h else " with {}".format(h)
     
     if not (prob_idx, search_idx) in EXCLUDE_IDX:
-        print("\nSolving {} using {}{}...".format(problem_name, search_name, hstring))
+        logging.info("\nSolving {} using {}{}...".format(problem_name,
+                                                         search_name, hstring))
 
         _p = p()
         _h = None if not h else getattr(_p, h)
@@ -82,11 +96,13 @@ def create_report_df(prob_idx, search_idx):
 
         report = evaluation(*results)
     else:
-        print("\nSkipping {} using {}{}...".format(problem_name, search_name, hstring))
+        logging.info("\nSkipping {} using {}{}...".format(problem_name,
+                                                          search_name, hstring))
         report = failed_evaluation()
 
     report['Problem'] = problem_name
-    report['Search Method'] = search_name
+    if h != '': h = '_' + h
+    report['Search Method'] = search_name + h
     return pd.DataFrame([report])
 
 
