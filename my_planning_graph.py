@@ -432,10 +432,9 @@ class PlanningGraph():
         :return: bool
         '''
         # TODO test for Inconsistent Effects between nodes
-        for s_node_1 in node_a1.effnodes:
-            for s_node_2 in node_a2.effnodes:
-                return self.s_nodes_inconsistent(s_node_1, s_node_2)
-        return False
+        return any(self.s_nodes_inconsistent(s_node_1, s_node_2)
+                    for s_node_1 in node_a1.effnodes
+                    for s_node_2 in node_a2.effnodes)
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         '''
@@ -452,12 +451,12 @@ class PlanningGraph():
         :return: bool
         '''
         # TODO test for Interference between nodes
-        for s_node_1 in node_a1.effnodes:
-            for s_node_2 in node_a2.prenodes:
-                if self.s_nodes_inconsistent(s_node_1, s_node_2): return True
-        for s_node_1 in node_a1.prenodes:
-            for s_node_2 in node_a2.effnodes:
-                if self.s_nodes_inconsistent(s_node_1, s_node_2): return True
+        if any(self.s_nodes_inconsistent(s_node_1, s_node_2)
+               for s_node_1 in node_a1.effnodes
+               for s_node_2 in node_a2.prenodes): return True
+        if any(self.s_nodes_inconsistent(s_node_1, s_node_2)
+               for s_node_1 in node_a1.prenodes
+               for s_node_2 in node_a2.effnodes): return True
         return False
 
     def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
@@ -472,10 +471,8 @@ class PlanningGraph():
         '''
 
         # TODO test for Competing Needs between nodes
-        for s_node_1 in node_a1.prenodes:
-            for s_node_2 in node_a2.prenodes:
-                if s_node_1.is_mutex(s_node_2): return True
-        return False
+        return any(s_node_1.is_mutex(s_node_2) for s_node_1 in node_a1.parents
+                                               for s_node_2 in node_a2.parents)
 
     def update_s_mutex(self, nodeset: set):
         ''' Determine and update sibling mutual exclusion for S-level nodes
@@ -546,7 +543,6 @@ class PlanningGraph():
                     # if the current level contains the goal, add level cost
                     level_sum += i
                     break
-
         return level_sum
 
     
