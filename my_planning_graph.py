@@ -317,18 +317,15 @@ class PlanningGraph():
         #   action node is added, it MUST be connected to the S node instances in
         # the appropriate s_level set.
 
-        self.a_levels.append(set())  # initialize
-        s_nodes = self.s_levels[level]  # all state nodes of the current level
-        for action in self.all_actions:
-            a_node = PgNode_a(action)
-            # if current action node `a_node` is valid, add it to action level
-            if a_node.prenodes.issubset(s_nodes):
-                self.a_levels[level].add(a_node)  #
-                # ...and connect it
-                parents = set(n for n in s_nodes if n in a_node.prenodes)
-                a_node.parents = parents
-                for s_node in parents:
-                    s_node.children.add(a_node)
+        s_nodes = self.s_levels[level]
+        possible_a_nodes = (PgNode_a(action) for action in self.all_actions)
+        valid_a_nodes = set(n for n in possible_a_nodes if n.prenodes.issubset(s_nodes))
+        self.a_levels.append(valid_a_nodes)
+        # connect the nodes
+        for a_node in valid_a_nodes:
+            a_node.parents = set(n for n in s_nodes if n in a_node.prenodes)
+            for s_node in a_node.parents:
+                s_node.children.add(a_node)
 
     def add_literal_level(self, level):
         ''' add an S (literal) level to the Planning Graph
