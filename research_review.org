@@ -1,0 +1,50 @@
+#+OPTIONS: toc:nil author:nil creator:nil
+#+LaTeX_HEADER: \author{J\"org D\"opfert}
+#+LaTeX_CLASS_OPTIONS: [11pt]
+#+LaTeX_HEADER: \usepackage[a4paper, total={140mm,237mm}, left=35mm, top=20mm]{geometry}
+
+#+TITLE: Planning (Lesson 11): Research Review
+ 
+
+In the following report, I summarize and put into context some
+important developments in the field of Artificial Intelligence (AI)
+planning, namely STRIPS, ADL, PDDL and GRAPHPLAN. I will heavily
+borrow from chapter 11 of the AIMA book cite:russelNorvig2003:aima.
+
+
+
+\hspace{1cm}
+
+The first major automated planning system STRIPS (Stanford Research
+Institute Problem Solver) was developed by Fikes and Nilson in 1971 at
+SRI International cite:fikes71_strip for robot nativation. The most
+most influential part of STRIPS is its action representation, which
+has been the foundation for many other
+systems since cite:russelNorvig2003:aima. As an example, ADL, the
+Action Description Language
+cite:pednault87_formul_multiag_dynam_world_probl, is an important
+variant of STRIPS that for instance allows for equality constraints.
+
+
+In 1998, McDermott et al. presented PDDL, the Planning Domain
+Definition Language cite:mcdermott98pddl, in order to standardize
+STRIPS and other planning languages. PDDL has become  a widely accepted
+standard within the scientific community to
+compare results cite:russelNorvig2003:aima, and is furthermore used in competitions of the Conference on Artificial Intelligence
+Planning Systems (AIPS) cite:pddl.
+
+After partial-order planning (not described here) had been "dominating
+... 20 years of research" cite:russelNorvig2003:aima, the
+GRAPHPLAN system cite:blum97_fast_plann_throug_plann_graph_analy
+developed by Blum and Furst in 1995 brought the field of planning
+again forward. The GRAPHPLAN algorithm, which was much
+faster than previous partial-order planners, is based on the concept
+of a /planning graph/ representing a relaxed version of the
+original problem. Besides of their usage in GRAPHPLAN, those planning graphs can also be used as an efficient
+tool for creating strong heuristics for state-space search.
+
+
+bibliographystyle:my_acm
+
+bibliography:mybib.bib
+
