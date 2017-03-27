@@ -243,17 +243,11 @@ class AirCargoProblem(Problem):
         conditions by ignoring the preconditions required for an action to be
         executed.
         '''
-        # todo implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
-        
-        # create new problem with current state as initial state
-        p = copy.deepcopy(self)
-        p.initial = node.state
-        # remove all action preconditions 
-        p.actions = lambda state: p.actions_list
-        # solve this problem with breadth first search
-        node_solution = breadth_first_search(p)
-        # count number of steps in solution
-        count = len(node_solution.solution())
+
+        count = 0
+        for i, fluent in enumerate(self.state_map):
+            if fluent in self.goal and node.state[i] == 'F':
+                count += 1
         return count
 
 
