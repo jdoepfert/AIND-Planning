@@ -28,8 +28,8 @@ SEARCHES = [["breadth_first_search", breadth_first_search, ""],
 EXCLUDE_IDX = [(1, 1),   # breadth first tree on prob 2
                (2, 1),   # breadth first tree on prob 3
                (2, 3),   # depth limited search on prob 3
-               (2, 7),   # h_ignore_preconditions on prob 3
-               (1, 7),   # h_ignore_preconditions on prob 1
+          #     (2, 7),   # h_ignore_preconditions on prob 3
+          #     (1, 7),   # h_ignore_preconditions on prob 2
           #     (1, 8),   # h_pg_levelsum on prob 2
                (2, 8),   # h_pg_levelsum on prob 3
                ]

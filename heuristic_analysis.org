@@ -48,7 +48,7 @@ methods have a larger plan lenghts than the optimal =breadth first
 search= solution for problems 2 and 3).
 
 
- The =breadth first search=  always finds an optimal plan, but at the
+ The =breadth first search=  always finds an optimal plan cite:russelNorvig2003:aima, but at the
 expense of speed: It is always slower than for example =depth first graph search=
 since it expands much more nodes (compare Figure [[fig:nodes]]). The
 slowest uninformed search seems to be =breadth first tree search=: It
@@ -90,7 +90,7 @@ plt.legend(loc='upper left')
 [[file:data/nodes.pdf]]
 
 Compared to =uniform cost search=, which is also guaranteed to find
-an optimal solution, =breadth first search= is a bit faster and also
+an optimal solution cite:russelNorvig2003:aima, =breadth first search= is a bit faster and also
 explores less nodes for all problems.
 
 The =uniform cost search= and =a star search h1= explore the same amount
@@ -98,36 +98,26 @@ of nodes, since they are virtually identical: The former choses the
 node with the cheapest path cost, and the latter choses the node with
 the cheapest path cost plus a constant.
 
-The informed searches =astar search pg levelsum= and =astar search
-ignore precond= perform similar on problem 1 in terms of computation
-time. However, the former expands much less nodes: This is expected,
-since the =levelsum= heuristic calculated using a planning graph
-should be much stronger than simply ignoring the action preconditions.
+Among the informed searches, =astar search ignore precond= is much
+faster than =astar search pg levelsum=. However, the latter expands
+much less nodes: This is expected, since the =levelsum= heuristic
+calculated using a planning graph should be much stronger than simply
+ignoring the action preconditions. The slower runtime can be
+attributed to the computational cost of constructing the planning graphs.
 
 
-The =astar search pg levelsum= search did not finish below 10 minutes
-on problem 3, and the =astar search ignore precond= search not even on
-problem 2. For the former, this probably due to the
-computational power required for building the planning graphs. For the
-latter, this might be due to my inefficient implementation: I use a
-breadth first search to find the solution lengths of the relaxed
-problem without action preconditions. This could probably be
-implemented much faster, especially if one assumes that the subgoal
-are independent.
-
-
-The informed searches find optimal plans for problem 1 and 2. For the
-=astar search ignore precond=, this is a general result, since it uses
-an admissible heuristic. The =astar search pg levelsum= is not
+The informed searches find optimal plans for all
+problems\footnote{excluding problem 3, where no result could be observed after 10 minutes for the planning graph search.}. For the =astar search
+ignore precond=, this is a general result, since it uses an admissible
+heuristic for this problem. The =astar search pg levelsum= is not
 neccessarily admissible, but has shown good performance according to
-the AIMA book.
+ref. cite:russelNorvig2003:aima.
 
 The informed searches expand less nodes than the optimal uniformed
-searches, as expected (this could only be fully assessed for problem 1 due
-to missing data). However, when it comes to speed, the informed
-searches are worse than the uninformed ones. Again, this could be
-attributed to the large overhead for building the planning graphs and
-my inefficient implementation of the "ignore preconditions" heuristic.
+searches, as expected. When it comes to speed, =astar search ignore
+precond= is every similar to =breadth first search=. However, =astar
+search pg levelsum= is much slower, which again can probably be
+attributed to the large overhead for building the planning graphs.
 
 
 * Optimal plans
@@ -277,6 +267,11 @@ return(tabulate(df, headers="keys", tablefmt="orgtbl"))
 #+BEGIN_LaTeX
 \end{adjustwidth} 
 #+END_LaTeX
+
+
+bibliographystyle:my_acm
+
+bibliography:mybib.bib
 
 
 * code blocks                                                      :noexport:
